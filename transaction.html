@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交易資料</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.2/css/dataTables.bootstrap4.min.css">
+<body>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+          <div class="table-responsive" id="app">
+            <table
+              class="table table-bordered"
+              id="dataTable"
+              width="100%"
+              cellspacing="0"
+            >
+              <thead>
+                <tr>
+                  <th>交易對</th>
+                  <th>標記價格</th>
+                  <th>指數價格</th>
+                  <th>下次資金費率結算時間</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr v-for="(item, index) in transList" :key="index">
+                  <td>{{item.pair}}</td>
+                  <td>{{item.markPrice}}</td>
+                  <td>{{item.indexPrice}}</td>
+                  <td>{{item.nextFundingTime}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+    </div>
+
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.2/js/dataTables.bootstrap4.min.js"></script>
+    <script src="./vendors/vue/vue.global.js"></script>
+
+    <script>
+        let transList;
+        $.ajax({
+            method: "GET",
+            url: "https://testnet.binancefuture.com/dapi/v1/premiumIndex ",
+            async: false, 
+            data: {},
+            dataType: "json",
+            success: function (response) {
+                transList = response;
+                for(let i = 0; i < response.length; i++){
+                    var unixTimestamp = response[i].nextFundingTime;
+                    var date = new Date(unixTimestamp);                       
+                    var realDate = formatDate(date);
+                    response[i].nextFundingTime = realDate;
+                } 
+            },
+        });
+
+        const RootComponent = {
+            data() {
+                return {
+                    transList: transList,
+                };
+            },
+            mounted() {
+                dataTable = $("#dataTable").DataTable();
+            },
+        };
+
+        var app = Vue.createApp(RootComponent);
+        var vm = app.mount("#app"); 
+
+        function padTo2Digits(num) {
+            return num.toString().padStart(2, '0');
+        }
+
+        function formatDate(date) {
+            return (
+                [
+                date.getFullYear(),
+                padTo2Digits(date.getMonth() + 1),
+                padTo2Digits(date.getDate()),
+                ].join('-') +
+                ' ' +
+                [
+                padTo2Digits(date.getHours()),
+                padTo2Digits(date.getMinutes()),
+                padTo2Digits(date.getSeconds()),
+                ].join(':')
+            );
+        }       
+      
+    </script>
+</body>
+</html>

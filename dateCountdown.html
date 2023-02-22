@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>倒數計時</title>
+    <link rel="stylesheet" href="./vendors/bootstrap-5.0.0-dist/css/bootstrap.min.css">
+  </head>
+  <body>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" style="margin: 20px;">
+        離228還有多久呢？
+    </button>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog  modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">答案是</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="app"><span id="countdown">{{ countdown }}</span></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
+    <script src="./vendors/vue/vue.global.prod.js"></script>
+    <script src="./vendors/bootstrap-5.0.0-dist/js/bootstrap.min.js"></script>
+    <script>
+      let app = Vue.createApp({
+        data() {
+          return {
+            d_final: new Date(2023, 1, 28, 0, 0, 0),
+            countdown: "",
+          };
+        },
+        mounted() {
+          this.get_countdown();
+          setInterval(() => {
+            this.get_countdown();
+          }, 1000);
+        },
+        methods: {
+          date_diff(date1_obj, date2_obj) {
+            // 相差的秒數
+            let diff_seconds = Math.floor(
+              Math.abs(date1_obj.getTime() - date2_obj.getTime()) / 1000
+            );
+
+            let days = Math.floor(diff_seconds / 60 / 60 / 24);
+            let hours = Math.floor((diff_seconds - days * 86400) / 60 / 60);
+            let minutes = Math.floor(
+              (diff_seconds - days * 86400 - hours * 3600) / 60
+            );
+            let seconds =
+              diff_seconds - days * 86400 - hours * 3600 - minutes * 60;
+
+            return `倒數 ${days} 天 ${hours} 小時 ${minutes} 分鐘 ${seconds} 秒鐘，就228囉！`;
+          },
+          get_countdown() {
+            let d = new Date();
+
+            this.countdown = this.date_diff(d, this.d_final);
+          },
+        },
+      });
+
+      app.mount("#app");
+    </script>
+  </body>
+</html>
